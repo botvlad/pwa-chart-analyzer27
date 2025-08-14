@@ -18,12 +18,9 @@
         </header>
 
         <label id="pair-label" for="pair" class="field-label">Select currency pair:</label>
-        <div style="display:flex; gap:6px; align-items:center;">
-            <select id="pair" aria-label="Currency pair" style="flex:1;"></select>
-            <button id="pair-analyze-btn" class="primary ripple" style="flex-shrink:0; padding: 0 14px;">⚡</button>
-        </div>
+        <select id="pair" aria-label="Currency pair"></select>
 
-        <label id="photo-label" class="field-label">Upload photo for analysis:</label>
+        <label id="photo-label" class="field-label">EUR/USD: Анализ фото</label>
         <div class="photo-row">
             <input type="file" id="photo" accept="image/*" capture="environment" style="display:none;">
             <button id="camera-btn" class="camera-button ripple" aria-label="Take photo">
