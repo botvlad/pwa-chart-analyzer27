@@ -52,7 +52,9 @@ function applyLang() {
     if (els.langToggle) els.langToggle.textContent = lang.toUpperCase();
     if (els.result && !els.result.dataset.custom) els.result.textContent = t.result;
     localStorage.setItem('lang', lang);
+    populatePairs();
 }
+
 
 function populatePairs() {
     const mainPairs = ['EUR/USD','USD/JPY','GBP/USD','USD/CHF','USD/CAD','AUD/USD','NZD/USD'];
@@ -68,92 +70,27 @@ function populatePairs() {
         'NZD/USD OTC','GBP/JPY OTC','EUR/JPY OTC'
     ];
     if (!els.pairSelect) return;
-    let html = '<optgroup label="Main Pairs">';
-    mainPairs.forEach(p => { html += '<option value="'+p+'">'+p+'</option>'; 
-let deferredPrompt;
-const installBtn = document.getElementById('install-btn');
 
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (installBtn) installBtn.classList.remove('hidden');
-});
+    // Перевод пункта "Анализ по фото"
+    const analysisOption = (lang === 'ru') ? 'Анализ по фото' : 'Photo analysis';
 
-if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const choiceResult = await deferredPrompt.userChoice;
-        if (choiceResult.outcome === 'accepted') {
-            console.log('PWA setup accepted');
-        } else {
-            console.log('PWA setup dismissed');
-        }
-        deferredPrompt = null;
-        installBtn.classList.add('hidden');
-    });
-}
+    let html = `<option value="${analysisOption}">${analysisOption}</option>`;
 
-});
+    html += '<optgroup label="Main Pairs">';
+    mainPairs.forEach(p => { html += `<option value="${p}">${p}</option>`; });
     html += '</optgroup>';
+
     html += '<optgroup label="Other Pairs">';
-    otherPairs.forEach(p => { html += '<option value="'+p+'">'+p+'</option>'; 
-let deferredPrompt;
-const installBtn = document.getElementById('install-btn');
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (installBtn) installBtn.classList.remove('hidden');
-});
-
-if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const choiceResult = await deferredPrompt.userChoice;
-        if (choiceResult.outcome === 'accepted') {
-            console.log('PWA setup accepted');
-        } else {
-            console.log('PWA setup dismissed');
-        }
-        deferredPrompt = null;
-        installBtn.classList.add('hidden');
-    });
-}
-
-});
+    otherPairs.forEach(p => { html += `<option value="${p}">${p}</option>`; });
     html += '</optgroup>';
+
     html += '<optgroup label="Pocket Option OTC">';
-    otcPairs.forEach(p => { html += '<option value="'+p+'">'+p+'</option>'; 
-let deferredPrompt;
-const installBtn = document.getElementById('install-btn');
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (installBtn) installBtn.classList.remove('hidden');
-});
-
-if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const choiceResult = await deferredPrompt.userChoice;
-        if (choiceResult.outcome === 'accepted') {
-            console.log('PWA setup accepted');
-        } else {
-            console.log('PWA setup dismissed');
-        }
-        deferredPrompt = null;
-        installBtn.classList.add('hidden');
-    });
-}
-
-});
+    otcPairs.forEach(p => { html += `<option value="${p}">${p}</option>`; });
     html += '</optgroup>';
+
     els.pairSelect.innerHTML = html;
 }
+
 
 function showPreview(file) {
     if (!file) return;
@@ -425,30 +362,6 @@ if (installBtn) {
 
 // Init
 populatePairs();
-
-// Обновление надписи "Анализ фото" в зависимости от выбранной валютной пары (верхняя и над фото)
-if (els.pairSelect && els.photoLabel) {
-    const updatePhotoLabels = () => {
-        const pair = els.pairSelect.value || 'EUR/USD';
-        els.photoLabel.textContent = `${pair}: Анализ фото`;
-        const topLabel = document.getElementById('pair-photo-top');
-        if (topLabel) topLabel.textContent = `${pair}: Анализ фото`;
-    };
-    els.pairSelect.addEventListener('change', updatePhotoLabels);
-    updatePhotoLabels();
-}
-
-
-// Обновление надписи "Анализ фото" в зависимости от выбранной валютной пары
-if (els.pairSelect && els.photoLabel) {
-    const updatePhotoLabel = () => {
-        const pair = els.pairSelect.value || 'EUR/USD';
-        els.photoLabel.textContent = `${pair}: Анализ фото`;
-    };
-    els.pairSelect.addEventListener('change', updatePhotoLabel);
-    updatePhotoLabel();
-}
-
 applyLang();
 
 // Register service worker if available and not already registered
@@ -523,25 +436,7 @@ timeButtons.forEach(btn => {
         selectedTime = btn.dataset.time;
         localStorage.setItem('timeframe', selectedTime);
         updateActiveTime();
-
-// Кнопка анализа рядом с валютной парой
-const pairAnalyzeBtn = document.getElementById('pair-analyze-btn');
-if (pairAnalyzeBtn && els.analyzeBtn) {
-    pairAnalyzeBtn.addEventListener('click', () => {
-        els.analyzeBtn.click();
-    });
-}
-
     });
 });
 
 updateActiveTime();
-
-// Кнопка анализа рядом с валютной парой
-const pairAnalyzeBtn = document.getElementById('pair-analyze-btn');
-if (pairAnalyzeBtn && els.analyzeBtn) {
-    pairAnalyzeBtn.addEventListener('click', () => {
-        els.analyzeBtn.click();
-    });
-}
-

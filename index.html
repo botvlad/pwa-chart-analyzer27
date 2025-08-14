@@ -17,12 +17,10 @@
             </div>
         </header>
 
-        <div id="pair-photo-top" class="field-label" style="text-align:center; font-weight:600;">EUR/USD: Анализ фото</div>
-
         <label id="pair-label" for="pair" class="field-label">Select currency pair:</label>
         <select id="pair" aria-label="Currency pair"></select>
 
-        <label id="photo-label" class="field-label">EUR/USD: Анализ фото</label>
+        <label id="photo-label" class="field-label">Upload photo for analysis:</label>
         <div class="photo-row">
             <input type="file" id="photo" accept="image/*" capture="environment" style="display:none;">
             <button id="camera-btn" class="camera-button ripple" aria-label="Take photo">
@@ -40,7 +38,6 @@
 
         <!-- Timeframe selection -->
         <div class="timeframe-row">
-            <button class="time-btn" data-time="15s">15s</button>
             <button class="time-btn" data-time="30s">30s</button>
             <button class="time-btn" data-time="1m">1m</button>
             <button class="time-btn" data-time="2m">2m</button>
