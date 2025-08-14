@@ -426,6 +426,19 @@ if (installBtn) {
 // Init
 populatePairs();
 
+// Обновление надписи "Анализ фото" в зависимости от выбранной валютной пары (верхняя и над фото)
+if (els.pairSelect && els.photoLabel) {
+    const updatePhotoLabels = () => {
+        const pair = els.pairSelect.value || 'EUR/USD';
+        els.photoLabel.textContent = `${pair}: Анализ фото`;
+        const topLabel = document.getElementById('pair-photo-top');
+        if (topLabel) topLabel.textContent = `${pair}: Анализ фото`;
+    };
+    els.pairSelect.addEventListener('change', updatePhotoLabels);
+    updatePhotoLabels();
+}
+
+
 // Обновление надписи "Анализ фото" в зависимости от выбранной валютной пары
 if (els.pairSelect && els.photoLabel) {
     const updatePhotoLabel = () => {
