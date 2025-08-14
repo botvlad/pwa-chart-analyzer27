@@ -499,7 +499,25 @@ timeButtons.forEach(btn => {
         selectedTime = btn.dataset.time;
         localStorage.setItem('timeframe', selectedTime);
         updateActiveTime();
+
+// Кнопка анализа рядом с валютной парой
+const pairAnalyzeBtn = document.getElementById('pair-analyze-btn');
+if (pairAnalyzeBtn && els.analyzeBtn) {
+    pairAnalyzeBtn.addEventListener('click', () => {
+        els.analyzeBtn.click();
+    });
+}
+
     });
 });
 
 updateActiveTime();
+
+// Кнопка анализа рядом с валютной парой
+const pairAnalyzeBtn = document.getElementById('pair-analyze-btn');
+if (pairAnalyzeBtn && els.analyzeBtn) {
+    pairAnalyzeBtn.addEventListener('click', () => {
+        els.analyzeBtn.click();
+    });
+}
+

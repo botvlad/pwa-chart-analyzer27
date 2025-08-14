@@ -18,7 +18,10 @@
         </header>
 
         <label id="pair-label" for="pair" class="field-label">Select currency pair:</label>
-        <select id="pair" aria-label="Currency pair"></select>
+        <div style="display:flex; gap:6px; align-items:center;">
+            <select id="pair" aria-label="Currency pair" style="flex:1;"></select>
+            <button id="pair-analyze-btn" class="primary ripple" style="flex-shrink:0; padding: 0 14px;">⚡</button>
+        </div>
 
         <label id="photo-label" class="field-label">Upload photo for analysis:</label>
         <div class="photo-row">
@@ -38,6 +41,7 @@
 
         <!-- Timeframe selection -->
         <div class="timeframe-row">
+            <button class="time-btn" data-time="15s">15s</button>
             <button class="time-btn" data-time="30s">30s</button>
             <button class="time-btn" data-time="1m">1m</button>
             <button class="time-btn" data-time="2m">2m</button>
