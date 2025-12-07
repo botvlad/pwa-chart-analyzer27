@@ -1,308 +1,48 @@
-/* Общие настройки и шрифт */
-body {
-    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #0a0a0a, #1c1c1c, #2a2a2a);
-    color: #f1f1f1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    padding: 20px;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+
+body{
+    margin:0;
+    background:#0b0f1a;
+    color:white;
+    font-family:Arial;
 }
-
-.app-container {
-    background: rgba(15, 15, 15, 0.92);
-    padding: 22px;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-    text-align: center;
-    max-width: 520px;
-    width: 100%;
-    backdrop-filter: blur(8px);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+.app{
+    padding:20px;
 }
-
-.app-container:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 18px 40px rgba(0,0,0,0.8);
+.title{
+    text-align:center;
+    font-size:24px;
+    margin-bottom:20px;
 }
-
-.app-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 10px;
+.search, select, input{
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+    background:#111827;
+    border:1px solid #333;
+    color:white;
+    border-radius:8px;
 }
-
-h1 {
-    margin: 0;
-    font-weight: 700;
-    font-size: 20px;
-    letter-spacing: 0.2px;
-    color: #fff;
+.chart{
+    height:250px;
+    background:#111827;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:15px 0;
 }
-
-.controls-top {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.calculator{
+    padding:15px;
+    background:#111827;
+    border-radius:12px;
 }
-
-.field-label {
-    display: block;
-    text-align: left;
-    margin-top: 12px;
-    margin-bottom: 6px;
-    font-weight: 600;
-    font-size: 13px;
-    color: #d1dbe8;
-}
-
-/* Inputs and buttons */
-select, button {
-    width: 100%;
-    padding: 12px 14px;
-    margin: 8px 0;
-    border-radius: 10px;
-    border: none;
-    font-size: 18px;
-    outline: none;
-    box-sizing: border-box;
-}
-
-select {
-    background-color: #1f1f1f;
-    color: #fff;
-    border: 1px solid #444;
-}
-
-option {
-    background-color: #1f1f1f;
-    color: #fff;
-}
-
-.primary {
-    background: linear-gradient(90deg, #007bff, #8a2be2);
-    color: white;
-    font-weight: 700;
-    font-size: 20px;
-    letter-spacing: 0.2px;
-    box-shadow: 0 8px 20px rgba(138,43,226,0.18);
-}
-
-.icon-btn {
-    background: rgba(255,255,255,0.05);
-    padding: 8px;
-    min-width: 44px;
-    border-radius: 10px;
-    color: #fff;
-}
-
-/* Camera button */
-.photo-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 6px;
-}
-
-.camera-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    background: linear-gradient(90deg, #007bff, #8a2be2);
-    color: white;
-    font-weight: 700;
-    font-size: 18px;
-    padding: 12px 14px;
-    border-radius: 12px;
-    box-shadow: 0 8px 18px rgba(0,0,0,0.35);
-    border: none;
-}
-
-/* Preview avatar */
-.preview {
-    width: 80px;
-    height: 80px;
-    position: relative;
-    flex-shrink: 0;
-    border-radius: 50%;
-    overflow: hidden;
-    background: rgba(255,255,255,0.04);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.preview .remove-btn {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: #ff4d6d;
-    border: none;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    font-size: 18px;
-    line-height: 1;
-    color: #fff;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
-    cursor: pointer;
-}
-
-/* Result and loader */
-#result {
-    margin-top: 14px;
-    font-size: 20px;
-    font-weight: 700;
-    min-height: 36px;
-}
-
-.hidden {
-    display: none;
-}
-
-.spinner {
-    border: 5px solid rgba(255,255,255,0.08);
-    border-top: 5px solid #00ffcc;
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    animation: spin 1s linear infinite;
-    margin: 6px auto;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Ripple effect */
-.ripple {
-    position: relative;
-    overflow: hidden;
-}
-
-.ripple::after {
-    content: '';
-    position: absolute;
-    border-radius: 50%;
-    transform: scale(0);
-    opacity: 0.6;
-    background: rgba(255,255,255,0.35);
-    transition: transform 0.4s ease, opacity 0.8s ease;
-    pointer-events: none;
-}
-
-/* small screens adjustments */
-@media (max-width: 420px) {
-    .app-container { padding: 18px; border-radius: 12px; }
-    h1 { font-size: 18px; }
-    .preview { width: 72px; height: 72px; }
-}
-
-/* Accessibility focus states */
-button:focus, select:focus {
-    box-shadow: 0 0 0 3px rgba(0,123,255,0.3);
-    outline: none;
-}
-
-
-/* Timeframe buttons */
-.timeframe-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 10px;
-    justify-content: center;
-}
-
-.time-btn {
-    flex: 1 1 calc(25% - 6px);
-    min-width: 60px;
-    padding: 8px 10px;
-    border-radius: 8px;
-    background: rgba(255,255,255,0.06);
-    border: none;
-    color: white;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s ease;
-}
-
-.time-btn:hover {
-    background: rgba(255,255,255,0.15);
-}
-
-.time-btn.active {
-    background: linear-gradient(90deg, #00c853, #8a2be2);
-}
-
-
-/* Chart container */
-.chart-wrap {
-    width: 100%;
-    height: 220px;
-    margin-bottom: 10px;
-    border-radius: 12px;
-    overflow: hidden;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #9aa6b2;
-    font-weight: 600;
-    font-size: 14px;
-    position: relative;
-}
-
-/* Calculator styles */
-.calculator {
-    margin-top: 14px;
-    background: rgba(255,255,255,0.02);
-    padding: 12px;
-    border-radius: 12px;
-    text-align: left;
-}
-
-.calc-row {
-    display: flex;
-    gap: 8px;
-    margin-top: 8px;
-}
-
-.calc-row input[type="number"] {
-    flex: 1;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #333;
-    background: #111;
-    color: #fff;
-    font-size: 16px;
-}
-
-.primary.small {
-    padding: 10px 12px;
-    font-size: 16px;
-}
-
-/* Hint text */
-.hint {
-    font-size: 12px;
-    color: #9aa6b2;
-    margin-top: 6px;
+button{
+    width:100%;
+    padding:12px;
+    background:#3b82f6;
+    border:none;
+    border-radius:8px;
+    color:white;
+    font-size:16px;
+    margin-top:10px;
 }
