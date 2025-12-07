@@ -1,31 +1,30 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OptiBotX</title>
-<link rel="stylesheet" href="style.css">
-<link rel="manifest" href="manifest.json">
-<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OptiBotX</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
+    <div class="app">
+        <h1 class="title">OptiBotX</h1>
 
-<div class="app">
+        <input id="pair-search" class="search" placeholder="Поиск валютной пары...">
+        <select id="pair-list"></select>
 
-    <input id="pair-search" class="search" placeholder="Поиск пары">
+        <div id="chart" class="chart">Выберите пару...</div>
 
-    <select id="pair-list" size="7" class="pair-list"></select>
-
-    <div id="chart" class="chart"></div>
-
-    <div class="calculator">
-        <input id="balance" type="number" placeholder="Введите баланс">
-        <button id="calc-btn">Рассчитать (÷11)</button>
-        <div id="stake">Ставка: —</div>
+        <div class="calculator">
+            <p>Калькулятор ставки</p>
+            <input id="balance" type="number" placeholder="Введите баланс">
+            <button id="calc-btn">Рассчитать</button>
+            <p id="stake">Ставка: —</p>
+        </div>
     </div>
 
-</div>
-
-<script src="app.js"></script>
+    <script src="https://s3.tradingview.com/tv.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
