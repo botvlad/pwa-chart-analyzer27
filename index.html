@@ -17,7 +17,14 @@
             </div>
         </header>
 
-        <label id="pair-label" for="pair" class="field-label">Select currency pair:</label>
+        <!-- Chart preview (from TradingView widget embed) -->
+        <div id="chart-wrap" class="chart-wrap">
+            <div id="chart-placeholder">Выберите валютную пару или введите в поиск...</div>
+        </div>
+
+        <label id="pair-label" for="pair-search" class="field-label">Select currency pair:</label>
+        <input id="pair-search" type="search" placeholder="Search pairs (e.g. EUR/USD)" aria-label="Search pair" />
+
         <select id="pair" aria-label="Currency pair"></select>
 
         <label id="photo-label" class="field-label">Upload photo for analysis:</label>
@@ -57,9 +64,23 @@
         </div>
         
         <div id="result" aria-live="polite"></div>
+
+        <!-- Stake calculator (fixed to bottom of interface visually) -->
+        <div class="calculator" aria-label="Stake calculator">
+            <label class="field-label">Calculator — enter your balance</label>
+            <div class="calc-row">
+                <input id="balance-input" type="number" placeholder="Enter balance (e.g. 1000)" />
+                <button id="calc-btn" class="primary small ripple">Calculate</button>
+            </div>
+            <p id="stake-output">Stake per trade: —</p>
+            <p class="hint">Calculator divides balance by 11 (safe fraction suggested).</p>
+        </div>
+
         <button id="install-btn" class="primary ripple hidden">Install App</button>
     </div>
 
     <script src="app.js"></script>
+    <!-- TradingView lightweight charts widget (used to show a quick interactive chart) -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 </body>
 </html>
