@@ -1,43 +1,31 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>OptiBotX — Pocket OTC</title>
-<link rel="stylesheet" href="style.css" />
-<link rel="manifest" href="manifest.json" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OptiBotX</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 </head>
 <body>
+
 <div class="app">
-  <header>
-    <h1>OptiBotX</h1>
-    <input id="pair-search" class="search" placeholder="Поиск пары или OTC..." aria-label="Поиск пары" />
-  </header>
 
-  <section class="pairs-wrap">
-    <div class="pairs-top">
-      <h3>OTC пары (сверху)</h3>
-      <select id="otc-list" size="8" aria-label="OTC пары"></select>
-    </div>
-    <div class="pairs-bottom">
-      <h3>Обычные пары (снизу)</h3>
-      <select id="normal-list" size="8" aria-label="Обычные пары"></select>
-    </div>
-  </section>
+    <input id="pair-search" class="search" placeholder="Поиск пары">
 
-  <div id="chart" class="chart">График отсутствует — выберите пару</div>
+    <select id="pair-list" size="7" class="pair-list"></select>
 
-  <section class="controls">
+    <div id="chart" class="chart"></div>
+
     <div class="calculator">
-      <label>Баланс</label>
-      <input id="balance" type="number" placeholder="Введите баланс" />
-      <button id="calc-btn">Рассчитать (делить на 11)</button>
-      <div id="stake">Ставка: —</div>
+        <input id="balance" type="number" placeholder="Введите баланс">
+        <button id="calc-btn">Рассчитать (÷11)</button>
+        <div id="stake">Ставка: —</div>
     </div>
-  </section>
+
 </div>
 
-<script src="https://s3.tradingview.com/tv.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

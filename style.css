@@ -1,18 +1,66 @@
 
-:root{--bg:#05070b;--panel:#0f1720;--accent:#7c3aed;--muted:#98a7b3}
-*{box-sizing:border-box}
-body{margin:0;font-family:Inter,Arial,system-ui;background:var(--bg);color:#fff}
-.app{max-width:920px;margin:18px auto;padding:16px}
-header{display:flex;gap:12px;align-items:center}
-header h1{margin:0;font-size:20px}
-.search{flex:1;padding:10px;border-radius:10px;border:1px solid #1f2937;background:#0b1220;color:#fff}
-.pairs-wrap{display:flex;gap:12px;margin-top:12px}
-.pairs-top,.pairs-bottom{flex:1;background:var(--panel);padding:10px;border-radius:10px;border:1px solid #111827}
-.pairs-top h3,.pairs-bottom h3{margin:0 0 8px 0;font-size:13px;color:var(--muted)}
-select{width:100%;height:200px;background:#071023;border:1px solid #16324a;color:#e6eef4;padding:8px;border-radius:8px}
-.chart{margin-top:12px;height:360px;border-radius:12px;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center;font-weight:600;color:#9aa6b2}
-.controls{display:flex;justify-content:flex-end;margin-top:12px}
-.calculator{background:linear-gradient(180deg,#071026,#081126);padding:12px;border-radius:10px;border:1px solid #122033;width:320px}
-.calculator input{width:100%;padding:8px;border-radius:8px;border:1px solid #16324a;background:#071224;color:#fff;margin-top:8px}
-.calculator button{width:100%;padding:10px;margin-top:8px;background:var(--accent);border:none;border-radius:8px;color:white;font-weight:600}
-#stake{margin-top:8px;color:var(--muted)}
+body {
+    margin: 0;
+    background: #04070d;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+.app {
+    padding: 14px;
+    max-width: 900px;
+    margin: auto;
+}
+
+.search {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #222;
+    background: #0b1220;
+    color: white;
+}
+
+.pair-list {
+    width: 100%;
+    margin-top: 10px;
+    background: #0a101c;
+    border: 1px solid #222;
+    color: white;
+    padding: 6px;
+    border-radius: 8px;
+}
+
+.chart {
+    height: 240px;
+    background: black;
+    border-radius: 12px;
+    margin-top: 12px;
+}
+
+.calculator {
+    margin-top: 14px;
+    background: #0f1720;
+    padding: 12px;
+    border-radius: 10px;
+}
+
+.calculator input {
+    width: 100%;
+    padding: 8px;
+    background: #0b1220;
+    border: 1px solid #222;
+    color: white;
+    border-radius: 8px;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    background: #6d28d9;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+}

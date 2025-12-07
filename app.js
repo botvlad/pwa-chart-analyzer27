@@ -1,85 +1,77 @@
-const otc = ["Gold OTC", "Brent Oil OTC", "WTI Crude Oil OTC", "Silver OTC", "Natural Gas OTC", "Platinum spot OTC", "Palladium spot OTC", "NVIDIA OTC", "Apple OTC", "Microsoft OTC", "Tesla OTC", "Facebook Inc OTC", "Amazon OTC", "McDonald's OTC", "Intel OTC", "Pfizer Inc OTC", "Johnson & Johnson OTC", "Citigroup Inc OTC", "ExxonMobil OTC", "FedEx OTC", "Coinbase Global OTC", "BNB OTC", "Solana OTC", "VIX Index OTC", "Palantir Technologies (PLTR) OTC", "GameStop Corp. (GME) OTC", "AMD OTC", "COIN OTC", "Marathon Digital (MARA) OTC", "UAH/USD OTC", "KES/USD OTC", "ZAR/USD OTC", "NGN/USD OTC", "AED/CNY OTC", "BHD/CNY OTC", "USD/THB OTC", "USD/TRY OTC", "USD/ZAR OTC", "USD/MXN OTC", "USD/PLN OTC", "EUR/TRY OTC", "EUR/PLN OTC", "EUR/SEK OTC", "GBP/SEK OTC"];
-const normal = ["EUR/USD", "GBP/USD", "USD/JPY", "USD/CHF", "USD/CAD", "AUD/USD", "NZD/USD", "EUR/GBP", "EUR/JPY", "GBP/JPY", "AUD/JPY", "CHF/JPY", "EUR/AUD", "EUR/CAD"];
 
+const PAIRS = ["EUR/USD", "GBP/USD", "USD/JPY", "USD/CHF", "AUD/USD", "NZD/USD", "USD/CAD", "EUR/USD OTC", "GBP/USD OTC", "USD/JPY OTC", "AUD/USD OTC", "NZD/USD OTC"];
 
-const otcList = document.getElementById('otc-list');
-const normalList = document.getElementById('normal-list');
-const search = document.getElementById('pair-search');
-const chart = document.getElementById('chart');
+const search = document.getElementById("pair-search");
+const list = document.getElementById("pair-list");
+const chartBox = document.getElementById("chart");
 
-function populate(listEl, items){
-  listEl.innerHTML = '';
-  items.forEach(it=>{
-    const opt = document.createElement('option');
-    opt.value = it; opt.textContent = it;
-    listEl.appendChild(opt);
-  });
+function refreshList(filter="") {
+    list.innerHTML = "";
+    PAIRS.filter(p => p.toLowerCase().includes(filter.toLowerCase()))
+         .forEach(p => {
+            const o = document.createElement("option");
+            o.value = p;
+            o.textContent = p;
+            list.appendChild(o);
+         });
 }
 
-populate(otcList, otc);
-populate(normalList, normal);
+refreshList();
 
-// colorful search: highlight matching part (visual aid)
-// when user types, filter both lists
-search.addEventListener('input', ()=>{
-  const q = search.value.trim().toLowerCase();
-  const f1 = otc.filter(i=>i.toLowerCase().includes(q));
-  const f2 = normal.filter(i=>i.toLowerCase().includes(q));
-  populate(otcList, f1);
-  populate(normalList, f2);
-  // visually tint search border when active
-  search.style.borderColor = q? '#34d399' : '';
+search.addEventListener("input", () => {
+    refreshList(search.value);
 });
 
-// function to create a minimal TradingView chart with most UI hidden
-function showTV(symbol){
-  chart.innerHTML = '';
-  const cont = document.createElement('div');
-  cont.id = 'tvcontainer'; cont.style.width='100%'; cont.style.height='100%';
-  chart.appendChild(cont);
+let chart = null;
+let candleSeries = null;
 
-  // choose symbol mapping
-  let s = symbol.replace(/\s+/g,'').replace('/','');
-  if(/BTC|ETH|BNB|SOL|COIN|GME|PLTR|AMD/i.test(s)) s = 'BINANCE:' + s.replace(/\W/g,'');
-  else if(/Gold|Silver|Brent|WTI|NaturalGas|Platinum|Palladium|VIX|Index/i.test(s)) s = 'OANDA:' + s;
-  else if(s.toUpperCase().includes('OTC')) s = 'OANDA:' + s.replace(/OTC/gi,'');
-  else s = 'OANDA:' + s;
+function drawChart(pair) {
+    chartBox.innerHTML = "";
 
-  try{
-    new TradingView.widget({
-      container_id: 'tvcontainer',
-      autosize: true,
-      symbol: s,
-      interval: '60',
-      timezone: 'Etc/UTC',
-      theme: 'dark',
-      style: '1',
-      locale: 'ru',
-      toolbar_bg: '#0b1220',
-      hide_side_toolbar: true,
-      allow_symbol_change: false,
-      withdateranges: false,
-      hide_top_toolbar: true,
-      save_image: false,
-      studies: []
+    chart = LightweightCharts.createChart(chartBox, {
+        layout: {
+            background: { color: '#000' },
+            textColor: '#000' 
+        },
+        grid: {
+            vertLines: { visible: false },
+            horzLines: { visible: false }
+        },
+        width: chartBox.clientWidth,
+        height: 240,
+        timeScale: {
+            visible: false
+        },
+        rightPriceScale: {
+            visible: false
+        }
     });
-  }catch(e){
-    chart.textContent = 'График недоступен для ' + symbol;
-  }
+
+    candleSeries = chart.addCandlestickSeries();
+
+    // Generate mock data
+    const now = Math.floor(Date.now()/1000);
+    let data = [];
+    let price = 1;
+
+    for(let i=120;i>0;i--) {
+        let o = price + (Math.random()-0.5)*0.01;
+        let c = o + (Math.random()-0.5)*0.01;
+        let h = Math.max(o,c) + 0.005;
+        let l = Math.min(o,c) - 0.005;
+        data.push({ time: now - i*60, open:o, high:h, low:l, close:c });
+        price = c;
+    }
+
+    candleSeries.setData(data);
 }
 
-// show chart when selecting
-[otcList, normalList].forEach(el => {
-  el.addEventListener('change', ()=>{
-    const val = el.value;
-    if(!val) return;
-    showTV(val);
-  });
+list.addEventListener("change", () => {
+    drawChart(list.value);
 });
 
-// calculator
-document.getElementById('calc-btn').addEventListener('click', ()=>{
-  const bal = parseFloat(document.getElementById('balance').value || '0');
-  const stake = !isNaN(bal) && bal>0 ? (bal/11) : null;
-  document.getElementById('stake').textContent = stake ? 'Ставка: ' + stake.toFixed(2) : 'Ставка: —';
+document.getElementById("calc-btn").addEventListener("click", () => {
+    const bal = parseFloat(document.getElementById("balance").value || 0);
+    const out = bal > 0 ? (bal/11).toFixed(2) : "—";
+    document.getElementById("stake").textContent = "Ставка: " + out;
 });
