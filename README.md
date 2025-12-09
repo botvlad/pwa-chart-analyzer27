@@ -1,35 +1,30 @@
-Chart Analysis Tool — PWA
-========================
+AI OptiBotX — PWA for Vercel deployment
+=====================================
 
-Файлы:
-  - index.html
-  - style.css
-  - app.js
-  - manifest.json
-  - service-worker.js
-  - icons/icon-192.png
-  - icons/icon-512.png
+This archive contains a static PWA ready to deploy on Vercel.
 
-Быстрая инструкция для деплоя на GitHub + Vercel:
+Important:
+- The JS file contains a placeholder:
+  const API_KEY = "REPLACE_WITH_YOUR_KEY";
+  You must replace it with your TwelveData API key *before* deploying, or implement a serverless proxy to keep the key secret.
 
-1) Инициализируй git-репозиторий:
-   git init
-   git add .
-   git commit -m "Initial PWA commit"
+Quick deploy on Vercel:
+1. Unzip and create a new project in Vercel linked to the folder.
+2. If you want to keep the API key secret, create a serverless function to proxy requests and add the env var TWELVEDATA_API_KEY in Vercel.
+3. Alternatively, edit app.js and set your API key directly (not recommended for public repos).
 
-2) Создай репозиторий на GitHub и запушь:
-   git remote add origin https://github.com/USERNAME/REPO.git
-   git branch -M main
-   git push -u origin main
+Local testing:
+- Use a simple static server, e.g.:
+  python -m http.server 8000
+  open http://localhost:8000
 
-3) Перейди в Vercel, импортируй репозиторий и задеплой.
-   По умолчанию Vercel сам развернёт статический сайт.
+Files included:
+- index.html
+- style.css
+- app.js (replace API key)
+- manifest.json
+- service-worker.js
+- icon-192.png
+- icon-512.png
+- README.md
 
-4) После деплоя проверь:
-   - Открой сайт в Chrome на телефоне.
-   - Нажми в меню "Добавить на главный экран".
-   - Отключи интернет — приложение должно открываться (кэш).
-
-Примечание:
-- Для реального AI-анализа нужно прикрутить бэкенд (API).
-- Если иконки выглядят слишком простыми — замени icons/*.png на свои.

@@ -1,442 +1,225 @@
-document.addEventListener('DOMContentLoaded', function() {
-// Простая логика: предпросмотр фото, переводы, fake-analyze, ripple
-const i18n = {
-    en: {
-        title: "AI OptiBotX",
-        selectPair: "Select currency pair:",
-        uploadPhoto: "Upload photo for analysis:",
-        takePhoto: "Take Photo",
-        analyze: "Analyze",
-        analyzing: "Analyzing...",
-        result: "No result yet",
-    },
-    ru: {
-        title: "AI OptiBotX",
-        selectPair: "Выберите валютную пару:",
-        uploadPhoto: "Загрузите фото для анализа:",
-        takePhoto: "Сфотографировать",
-        analyze: "Анализировать",
-        analyzing: "Идёт анализ...",
-        result: "Результат отсутствует",
-    }
+// app.js — Lightweight Charts + TwelveData (time_series + quote polling)
+// IMPORTANT: Replace API_KEY with your TwelveData API key before deploying.
+// For security you can replace the string or configure a serverless function to proxy the key.
+const API_KEY = "REPLACE_WITH_YOUR_KEY";
+
+const pairs = [
+  'EUR/USD','USD/JPY','GBP/USD','USD/CHF','USD/CAD','AUD/USD','NZD/USD',
+  'EUR/GBP','EUR/JPY','GBP/JPY','AUD/JPY','CHF/JPY','USD/SGD','USD/HKD','USD/TRY',
+  'EUR/AUD','CAD/JPY','NZD/JPY','AUD/NZD','EUR/CAD','GBP/CAD','AUD/CAD','NZD/CAD',
+  'GBP/AUD','EUR/CHF','GBP/CHF','AUD/CHF','NZD/CHF','EUR/NZD','GBP/NZD',
+  'USD/ZAR','USD/MXN','USD/PLN','USD/DKK','USD/NOK','USD/SEK'
+];
+
+const timeframeMap = {
+  '5s': 5,
+  '10s': 10,
+  '15s': 15,
+  '30s': 30,
+  '1m': 60,
+  '2m': 120,
+  '4m': 240,
+  '5m': 300,
+  '10m': 600,
+  '20m': 1200,
+  '1h': 3600
 };
 
-let lang = localStorage.getItem('lang') || 'en';
+let currentPair = localStorage.getItem('pair') || 'EUR/USD';
+let currentTF = localStorage.getItem('timeframe') || '5s';
+let pollTimer = null;
+let chart = null;
+let series = null;
+let lastTimeAdded = 0;
 
-const els = {
-    title: document.getElementById('title'),
-    pairLabel: document.getElementById('pair-label'),
-    photoLabel: document.getElementById('photo-label'),
-    cameraText: document.getElementById('camera-text'),
-    cameraBtn: document.getElementById('camera-btn'),
-    photoInput: document.getElementById('photo'),
-    preview: document.getElementById('preview'),
-    previewImg: document.getElementById('preview-img'),
-    removePhoto: document.getElementById('remove-photo'),
-    analyzeBtn: document.getElementById('analyze'),
-    loading: document.getElementById('loading'),
-    loadingText: document.getElementById('loading-text'),
-    result: document.getElementById('result'),
-    langToggle: document.getElementById('lang-toggle'),
-    pairSelect: document.getElementById('pair'),
-};
+// DOM
+const pairSelect = document.getElementById('pair');
+const timeframeRow = document.getElementById('timeframe-row');
+const resultText = document.getElementById('result');
+const analyzeBtn = document.getElementById('analyze');
 
-function applyLang() {
-    const t = i18n[lang];
-    if (els.title) els.title.textContent = t.title;
-    if (els.pairLabel) els.pairLabel.textContent = t.selectPair;
-    if (els.photoLabel) els.photoLabel.textContent = t.uploadPhoto;
-    if (els.cameraText) els.cameraText.textContent = t.takePhoto;
-    if (els.analyzeBtn) els.analyzeBtn.textContent = t.analyze;
-    if (els.loadingText) els.loadingText.textContent = t.analyzing;
-    if (els.langToggle) els.langToggle.textContent = lang.toUpperCase();
-    if (els.result && !els.result.dataset.custom) els.result.textContent = t.result;
-    localStorage.setItem('lang', lang);
-    populatePairs();
-}
-
-
+// Populate select
 function populatePairs() {
-    const mainPairs = ['EUR/USD','USD/JPY','GBP/USD','USD/CHF','USD/CAD','AUD/USD','NZD/USD'];
-    const otherPairs = [
-        'EUR/GBP','EUR/JPY','GBP/JPY','AUD/JPY','CHF/JPY','USD/SGD','USD/HKD','USD/TRY',
-        'EUR/AUD','CAD/JPY','NZD/JPY','AUD/NZD','EUR/CAD','GBP/CAD','AUD/CAD','NZD/CAD',
-        'GBP/AUD','EUR/CHF','GBP/CHF','AUD/CHF','NZD/CHF','EUR/NZD','GBP/NZD',
-        'USD/ZAR','USD/MXN','USD/PLN','USD/DKK','USD/NOK','USD/SEK','EUR/PLN','EUR/TRY','EUR/SEK',
-        'GBP/SEK','AUD/SGD','CAD/CHF','CHF/PLN','NZD/CHF'
-    ];
-    const otcPairs = [
-        'EUR/USD OTC','GBP/USD OTC','USD/JPY OTC','AUD/USD OTC','USD/CAD OTC','USD/CHF OTC',
-        'NZD/USD OTC','GBP/JPY OTC','EUR/JPY OTC'
-    ];
-    if (!els.pairSelect) return;
-
-    // Перевод пункта "Анализ по фото"
-    const analysisOption = (lang === 'ru') ? 'Анализ по фото' : 'Photo analysis';
-
-    let html = `<option value="${analysisOption}">${analysisOption}</option>`;
-
-    html += '<optgroup label="Main Pairs">';
-    mainPairs.forEach(p => { html += `<option value="${p}">${p}</option>`; });
-    html += '</optgroup>';
-
-    html += '<optgroup label="Other Pairs">';
-    otherPairs.forEach(p => { html += `<option value="${p}">${p}</option>`; });
-    html += '</optgroup>';
-
-    html += '<optgroup label="Pocket Option OTC">';
-    otcPairs.forEach(p => { html += `<option value="${p}">${p}</option>`; });
-    html += '</optgroup>';
-
-    els.pairSelect.innerHTML = html;
-}
-
-
-function showPreview(file) {
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    els.previewImg.src = url;
-    els.preview.classList.remove('hidden');
-    els.preview.setAttribute('aria-hidden','false');
-    // освобождение объекта при удалении позже
-    els.previewImg.onload = () => { URL.revokeObjectURL(url); };
-}
-
-els.cameraBtn.addEventListener('click', () => {
-    if (els.photoInput) els.photoInput.click();
-
-let deferredPrompt;
-const installBtn = document.getElementById('install-btn');
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (installBtn) installBtn.classList.remove('hidden');
-});
-
-if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const choiceResult = await deferredPrompt.userChoice;
-        if (choiceResult.outcome === 'accepted') {
-            console.log('PWA setup accepted');
-        } else {
-            console.log('PWA setup dismissed');
-        }
-        deferredPrompt = null;
-        installBtn.classList.add('hidden');
+  const groups = [
+    {label: 'Main Pairs', items: pairs.slice(0,7)},
+    {label: 'Other Pairs', items: pairs.slice(7)}
+  ];
+  pairSelect.innerHTML = '';
+  groups.forEach(g=>{
+    const optgroup = document.createElement('optgroup');
+    optgroup.label = g.label;
+    g.items.forEach(sym=>{
+      const opt = document.createElement('option');
+      opt.value = sym;
+      opt.textContent = sym;
+      if (sym === currentPair) opt.selected = true;
+      optgroup.appendChild(opt);
     });
+    pairSelect.appendChild(optgroup);
+  });
 }
 
-});
-
-els.photoInput.addEventListener('change', (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (file) {
-        showPreview(file);
-    }
-
-let deferredPrompt;
-const installBtn = document.getElementById('install-btn');
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (installBtn) installBtn.classList.remove('hidden');
-});
-
-if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const choiceResult = await deferredPrompt.userChoice;
-        if (choiceResult.outcome === 'accepted') {
-            console.log('PWA setup accepted');
-        } else {
-            console.log('PWA setup dismissed');
-        }
-        deferredPrompt = null;
-        installBtn.classList.add('hidden');
-    });
-}
-
-});
-
-els.removePhoto.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (els.photoInput) els.photoInput.value = '';
-    if (els.previewImg) els.previewImg.src = '';
-    if (els.preview) {
-        els.preview.classList.add('hidden');
-        els.preview.setAttribute('aria-hidden','true');
-    }
-
-let deferredPrompt;
-const installBtn = document.getElementById('install-btn');
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (installBtn) installBtn.classList.remove('hidden');
-});
-
-if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const choiceResult = await deferredPrompt.userChoice;
-        if (choiceResult.outcome === 'accepted') {
-            console.log('PWA setup accepted');
-        } else {
-            console.log('PWA setup dismissed');
-        }
-        deferredPrompt = null;
-        installBtn.classList.add('hidden');
-    });
-}
-
-});
-
-els.analyzeBtn.addEventListener('click', async () => {
-    // Простая имитация анализа
-    if (!els.loading || !els.result) return;
-    els.loading.classList.remove('hidden');
-    els.result.textContent = '';
-    els.result.dataset.custom = '';
-    els.analyzeBtn.disabled = true;
-    els.result.style.color = ''; // сброс цвета
-    try {
-        await new Promise(res=>setTimeout(res, 1100));
-        const pair = (els.pairSelect && els.pairSelect.value) ? els.pairSelect.value : 'EUR/USD';
-        const fakeScore = (Math.random()*2-1).toFixed(2); // -1..1
-        const scoreNum = parseFloat(fakeScore);
-        const isBuy = scoreNum > 0;
-        const signal = isBuy ? 'BUY' : 'SELL';
-        const arrow = isBuy ? '↑' : '↓';
-        const color = isBuy ? '#4ade80' : '#f87171';
-        const text = `${pair}: ${signal} ${arrow} (${fakeScore})`;
-        els.result.textContent = text;
-        els.result.style.color = color;
-        els.result.dataset.custom = '1';
-    } finally {
-        els.loading.classList.add('hidden');
-        els.analyzeBtn.disabled = false;
-    }
-
-let deferredPrompt;
-const installBtn = document.getElementById('install-btn');
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (installBtn) installBtn.classList.remove('hidden');
-});
-
-if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const choiceResult = await deferredPrompt.userChoice;
-        if (choiceResult.outcome === 'accepted') {
-            console.log('PWA setup accepted');
-        } else {
-            console.log('PWA setup dismissed');
-        }
-        deferredPrompt = null;
-        installBtn.classList.add('hidden');
-    });
-}
-
-});
-
-// language toggle
-if (els.langToggle) {
-    els.langToggle.addEventListener('click', () => {
-        lang = lang === 'en' ? 'ru' : 'en';
-        applyLang();
-    
-let deferredPrompt;
-const installBtn = document.getElementById('install-btn');
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (installBtn) installBtn.classList.remove('hidden');
-});
-
-if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const choiceResult = await deferredPrompt.userChoice;
-        if (choiceResult.outcome === 'accepted') {
-            console.log('PWA setup accepted');
-        } else {
-            console.log('PWA setup dismissed');
-        }
-        deferredPrompt = null;
-        installBtn.classList.add('hidden');
-    });
-}
-
-});
-}
-
-// Simple ripple effect for elements with .ripple
-document.addEventListener('pointerdown', function(e){
-    const target = e.target.closest && e.target.closest('.ripple');
-    if (!target) return;
-    const rect = target.getBoundingClientRect();
-    const circle = document.createElement('span');
-    const size = Math.max(rect.width, rect.height);
-    const x = (e.clientX - rect.left - size/2);
-    const y = (e.clientY - rect.top - size/2);
-    circle.style.position = 'absolute';
-    circle.style.left = x + 'px';
-    circle.style.top = y + 'px';
-    circle.style.width = circle.style.height = size + 'px';
-    circle.style.borderRadius = '50%';
-    circle.style.transform = 'scale(0)';
-    circle.style.background = 'rgba(255,255,255,0.18)';
-    circle.style.opacity = '0.9';
-    circle.style.pointerEvents = 'none';
-    circle.style.transition = 'transform 500ms ease, opacity 600ms ease';
-    target.appendChild(circle);
-    requestAnimationFrame(()=>{
-        circle.style.transform = 'scale(1)';
-        circle.style.opacity = '0';
-    
-let deferredPrompt;
-const installBtn = document.getElementById('install-btn');
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (installBtn) installBtn.classList.remove('hidden');
-});
-
-if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const choiceResult = await deferredPrompt.userChoice;
-        if (choiceResult.outcome === 'accepted') {
-            console.log('PWA setup accepted');
-        } else {
-            console.log('PWA setup dismissed');
-        }
-        deferredPrompt = null;
-        installBtn.classList.add('hidden');
-    });
-}
-
-});
-    setTimeout(()=>{ circle.remove(); }, 700);
-
-let deferredPrompt;
-const installBtn = document.getElementById('install-btn');
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (installBtn) installBtn.classList.remove('hidden');
-});
-
-if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const choiceResult = await deferredPrompt.userChoice;
-        if (choiceResult.outcome === 'accepted') {
-            console.log('PWA setup accepted');
-        } else {
-            console.log('PWA setup dismissed');
-        }
-        deferredPrompt = null;
-        installBtn.classList.add('hidden');
-    });
-}
-
-});
-
-// Init
-populatePairs();
-applyLang();
-
-// Register service worker if available and not already registered
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js').catch(()=>{
-let deferredPrompt;
-const installBtn = document.getElementById('install-btn');
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (installBtn) installBtn.classList.remove('hidden');
-});
-
-if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const choiceResult = await deferredPrompt.userChoice;
-        if (choiceResult.outcome === 'accepted') {
-            console.log('PWA setup accepted');
-        } else {
-            console.log('PWA setup dismissed');
-        }
-        deferredPrompt = null;
-        installBtn.classList.add('hidden');
-    });
-}
-
-});
-}
-
-
-let deferredPrompt;
-const installBtn = document.getElementById('install-btn');
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (installBtn) installBtn.classList.remove('hidden');
-});
-
-if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const choiceResult = await deferredPrompt.userChoice;
-        if (choiceResult.outcome === 'accepted') {
-            console.log('PWA setup accepted');
-        } else {
-            console.log('PWA setup dismissed');
-        }
-        deferredPrompt = null;
-        installBtn.classList.add('hidden');
-    });
-}
-
-});
-
-// Таймфреймы
-const timeButtons = document.querySelectorAll('.time-btn');
-let selectedTime = localStorage.getItem('timeframe') || '1m';
-
-function updateActiveTime() {
-    timeButtons.forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.time === selectedTime);
-    });
-}
-
-timeButtons.forEach(btn => {
+// Create timeframe buttons
+function createTimeButtons() {
+  timeframeRow.innerHTML = '';
+  Object.keys(timeframeMap).forEach(tf=>{
+    const btn = document.createElement('button');
+    btn.className = 'time-btn' + (tf === currentTF ? ' active' : '');
+    btn.textContent = tf;
+    btn.dataset.tf = tf;
     btn.addEventListener('click', () => {
-        selectedTime = btn.dataset.time;
-        localStorage.setItem('timeframe', selectedTime);
-        updateActiveTime();
+      if (currentTF === tf) return;
+      currentTF = tf;
+      localStorage.setItem('timeframe', currentTF);
+      document.querySelectorAll('.time-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      restartDataStream();
     });
+    timeframeRow.appendChild(btn);
+  });
+}
+
+// Initialize chart
+function createChart() {
+  const chartContainer = document.getElementById('chart');
+  chartContainer.innerHTML = '';
+  chart = LightweightCharts.createChart(chartContainer, {
+    width: chartContainer.clientWidth,
+    height: 300,
+    layout: { backgroundColor: '#0f1113', textColor: '#a6b0c3' },
+    grid: { vertLines: { color: 'rgba(255,255,255,0.03)' }, horzLines: { color: 'rgba(255,255,255,0.03)' } },
+    rightPriceScale: { visible: true, borderColor: 'rgba(255,255,255,0.03)' },
+    timeScale: { borderColor: 'rgba(255,255,255,0.03)', timeVisible: true, secondsVisible: true }
+  });
+  series = chart.addLineSeries({
+    color: '#3b82f6',
+    lineWidth: 2,
+    priceLineVisible: false
+  });
+
+  window.addEventListener('resize', () => {
+    if (!chart) return;
+    chart.applyOptions({ width: chartContainer.clientWidth });
+  });
+}
+
+function tdDatetimeToUnix(dtStr) {
+  const ms = Date.parse(dtStr.replace(' ', 'T') + 'Z');
+  if (isNaN(ms)) return Math.floor(Date.now()/1000);
+  return Math.floor(ms/1000);
+}
+
+async function loadHistory(pair, baseInterval='1min', outputsize=200) {
+  try {
+    const url = `https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(pair)}&interval=${baseInterval}&outputsize=${outputsize}&format=json&apikey=${API_KEY}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    if (data.status && data.status === 'error') {
+      console.error('TwelveData error', data);
+      return [];
+    }
+    const values = data.values || data;
+    const points = values
+      .slice()
+      .reverse()
+      .map(v => ({ time: tdDatetimeToUnix(v.datetime || v.timestamp), value: parseFloat(v.close) }));
+    return points;
+  } catch (e) {
+    console.error('loadHistory error', e);
+    return [];
+  }
+}
+
+async function fetchQuote(pair) {
+  try {
+    const url = `https://api.twelvedata.com/quote?symbol=${encodeURIComponent(pair)}&apikey=${API_KEY}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    if (data.status && data.status === 'error') {
+      console.error('Quote error', data);
+      return null;
+    }
+    const price = parseFloat(data.price || data.close || data.ask || data.bid);
+    const ts = data.timestamp ? Number(data.timestamp) : Math.floor(Date.now()/1000);
+    if (isNaN(price)) return null;
+    return { time: ts, value: price };
+  } catch (e) {
+    console.error('fetchQuote error', e);
+    return null;
+  }
+}
+
+function appendPoint(p) {
+  if (!p) return;
+  if (p.time <= lastTimeAdded) {
+    series.update(p);
+    lastTimeAdded = p.time;
+  } else {
+    series.update(p);
+    lastTimeAdded = p.time;
+  }
+}
+
+async function startPolling() {
+  stopPolling();
+  const pollInterval = timeframeMap[currentTF] || 5;
+  const baseInterval = '1min';
+  const hist = await loadHistory(currentPair, baseInterval, 200);
+  if (hist.length) {
+    series.setData(hist);
+    lastTimeAdded = hist[hist.length-1].time;
+  } else {
+    series.setData([]);
+    lastTimeAdded = 0;
+  }
+
+  const q = await fetchQuote(currentPair);
+  if (q) appendPoint(q);
+
+  pollTimer = setInterval(async () => {
+    const q2 = await fetchQuote(currentPair);
+    if (q2) appendPoint(q2);
+  }, pollInterval * 1000);
+}
+
+function stopPolling() {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+}
+
+function restartDataStream() {
+  resultText.textContent = '';
+  startPolling();
+}
+
+pairSelect.addEventListener('change', () => {
+  currentPair = pairSelect.value;
+  localStorage.setItem('pair', currentPair);
+  restartDataStream();
 });
 
-updateActiveTime();
+analyzeBtn.addEventListener('click', async () => {
+  analyzeBtn.disabled = true;
+  analyzeBtn.textContent = 'Analyzing...';
+  const q = await fetchQuote(currentPair);
+  if (q) {
+    resultText.textContent = `${currentPair} ${q.value.toFixed(5)}`;
+    resultText.style.color = '#bfe9d7';
+  } else {
+    resultText.textContent = 'No data';
+    resultText.style.color = '#f87171';
+  }
+  analyzeBtn.textContent = 'Analyze';
+  analyzeBtn.disabled = false;
+});
+
+function init() {
+  populatePairs();
+  createTimeButtons();
+  createChart();
+  startPolling();
+}
+
+init();

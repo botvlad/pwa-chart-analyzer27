@@ -1,65 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Forex PWA</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css" />
-    <link rel="manifest" href="manifest.json">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI OptiBotX</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css" />
+  <!-- Lightweight Charts -->
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 </head>
 <body>
-    <div class="app-container" role="main" aria-labelledby="title">
-        <header class="app-header">
-            <h1 id="title">AI OptiBotX</h1>
-            <div class="controls-top">
-                <button id="lang-toggle" class="icon-btn" title="Change language">RU</button>
-            </div>
-        </header>
+  <div class="app-container" role="main" aria-labelledby="title">
+    <header class="app-header">
+      <h1 id="title">AI OptiBotX</h1>
+      <button id="lang-toggle" class="icon-btn" title="Toggle language">RU</button>
+    </header>
 
-        <label id="pair-label" for="pair" class="field-label">Select currency pair:</label>
-        <select id="pair" aria-label="Currency pair"></select>
-
-        <label id="photo-label" class="field-label">Upload photo for analysis:</label>
-        <div class="photo-row">
-            <input type="file" id="photo" accept="image/*" capture="environment" style="display:none;">
-            <button id="camera-btn" class="camera-button ripple" aria-label="Take photo">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 17a5 5 0 100-10 5 5 0 000 10zm-9-8h-1V7a2 2 0 012-2h3.17a2 2 0 001.41-.59l1.83-1.82A2 2 0 0112.83 2h2.34a2 2 0 011.42.59l1.83 1.82a2 2 0 001.41.59H21a2 2 0 012 2v2h-1a1 1 0 00-1 1v9a2 2 0 01-2 2H5a2 2 0 01-2-2v-9a1 1 0 00-1-1z"/>
-                </svg>
-                <span id="camera-text">Take Photo</span>
-            </button>
-
-            <div id="preview" class="preview hidden" aria-hidden="true">
-                <img id="preview-img" alt="Preview" />
-                <button id="remove-photo" class="remove-btn" aria-label="Remove photo">&times;</button>
-            </div>
-        </div>
-
-        <!-- Timeframe selection -->
-        <div class="timeframe-row">
-            <button class="time-btn" data-time="15s">15s</button>
-            <button class="time-btn" data-time="30s">30s</button>
-            <button class="time-btn" data-time="1m">1m</button>
-            <button class="time-btn" data-time="2m">2m</button>
-            <button class="time-btn" data-time="4m">4m</button>
-            <button class="time-btn" data-time="5m">5m</button>
-            <button class="time-btn" data-time="10m">10m</button>
-            <button class="time-btn" data-time="20m">20m</button>
-            <button class="time-btn" data-time="1h">1h</button>
-        </div>
-
-        <button id="analyze" class="primary ripple">Analyze</button>
-        
-        <div id="loading" class="hidden">
-            <div class="spinner" role="status" aria-hidden="true"></div>
-            <p id="loading-text">Analyzing...</p>
-        </div>
-        
-        <div id="result" aria-live="polite"></div>
-        <button id="install-btn" class="primary ripple hidden">Install App</button>
+    <label id="pair-label" class="field-label">Select currency pair:</label>
+    <div class="select-wrap">
+      <select id="pair" aria-label="Currency pair"></select>
+      <div class="select-arrow">▾</div>
     </div>
 
-    <script src="app.js"></script>
+    <div id="chart-block" class="chart-block">
+      <div id="chart" class="chart"></div>
+    </div>
+
+    <div class="timeframe-row" id="timeframe-row">
+      <!-- Buttons created by JS -->
+    </div>
+
+    <div class="controls-row">
+      <button id="analyze" class="primary ripple">Analyze</button>
+      <div id="result" aria-live="polite" class="result-text"></div>
+    </div>
+
+    <button id="install-btn" class="primary ripple hidden">Install App</button>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
