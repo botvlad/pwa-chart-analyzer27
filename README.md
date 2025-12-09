@@ -1,30 +1,25 @@
-AI OptiBotX — PWA for Vercel deployment
-=====================================
+AI OptiBotX — PWA (candlestick version)
+=======================================
 
-This archive contains a static PWA ready to deploy on Vercel.
+This package contains a client-side PWA using Lightweight Charts (candlestick series)
+and TwelveData REST API. For sub-minute candlesticks (5s/10s/etc.) the app aggregates
+incoming `quote` responses into small candles client-side.
 
 Important:
-- The JS file contains a placeholder:
-  const API_KEY = "REPLACE_WITH_YOUR_KEY";
-  You must replace it with your TwelveData API key *before* deploying, or implement a serverless proxy to keep the key secret.
+- Replace API_KEY in app.js with your TwelveData API key or implement a serverless
+  proxy to keep the key secret.
+- TwelveData free plan may limit frequency; if you need higher reliability consider
+  a small serverless function as a proxy or a paid WebSocket feed.
 
-Quick deploy on Vercel:
-1. Unzip and create a new project in Vercel linked to the folder.
-2. If you want to keep the API key secret, create a serverless function to proxy requests and add the env var TWELVEDATA_API_KEY in Vercel.
-3. Alternatively, edit app.js and set your API key directly (not recommended for public repos).
+To test locally:
+- Unzip and run a static server (python -m http.server) and open in browser.
+- Ensure CORS allows requests (TwelveData is public).
 
-Local testing:
-- Use a simple static server, e.g.:
-  python -m http.server 8000
-  open http://localhost:8000
-
-Files included:
+Files:
 - index.html
 - style.css
-- app.js (replace API key)
+- app.js  (replace API key)
 - manifest.json
 - service-worker.js
-- icon-192.png
-- icon-512.png
+- icon-192.png, icon-512.png (copied if present)
 - README.md
-
